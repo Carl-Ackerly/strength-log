@@ -1,0 +1,92 @@
+* { box-sizing: border-box; }
+:root {
+  color-scheme: dark;
+  font: 16px/1.45 system-ui, sans-serif;
+  color: #eaf4ff;
+  background: #0b111b;
+  --panel: #111b2b;
+  --edge: #2d4056;
+  --muted: #afbed0;
+  --ice: #a1dcff;
+  --gold: #d5b580;
+}
+body { margin: 0; background: radial-gradient(ellipse at top, #192b43, transparent 650px); }
+.app { max-width: 1040px; margin: auto; padding: max(22px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+header { display: flex; align-items: center; gap: 14px; padding: 4px 0 18px; }
+.brand-mark { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #a88c5c; border-radius: 11px; color: var(--gold); font-family: Georgia, serif; }
+h1, h2, p { margin: 0; }
+h1, h2 { font-family: Georgia, serif; font-weight: 500; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.35rem; }
+p, small { color: var(--muted); }
+button, .button, select, input { font: inherit; color: inherit; }
+button, .button, select { background: #172539; border: 1px solid var(--edge); border-radius: 9px; min-height: 44px; padding: 7px 12px; }
+button, .button { cursor: pointer; }
+button:hover:not(:disabled), .button:hover { border-color: var(--ice); }
+button:disabled { opacity: .48; cursor: default; }
+:focus-visible { outline: 2px solid var(--ice); outline-offset: 2px; }
+nav { display: flex; gap: 6px; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--edge); }
+nav button { border-color: transparent; background: transparent; }
+nav [aria-current] { background: #1c3148; color: var(--ice); border-color: var(--edge); }
+.dashboard { display: grid; grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.45fr); align-items: start; gap: 16px; }
+aside { display: grid; gap: 16px; }
+.panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: clamp(12px, 2.5vw, 21px); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center; margin: 12px 0; }
+.calendar-grid button { padding: 0; position: relative; min-height: 42px; background: #142033; }
+.calendar-grid button[aria-current="date"] { color: var(--ice); text-decoration: underline; text-underline-offset: 4px; }
+.calendar-grid button[aria-pressed="true"] { outline: 1px solid var(--ice); background: #213c55; }
+.dot, .legend i { width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: var(--gold); }
+.dot { position: absolute; bottom: 4px; left: calc(50% - 2.5px); }
+.completed .dot, .legend .ice { background: var(--ice); }
+.legend { font-size: .78rem; color: var(--muted); }
+.legend i { margin-inline: 3px; vertical-align: middle; }
+.legend button { color: var(--ice); }
+.timer strong { font-size: 2rem; color: var(--ice); font-variant-numeric: tabular-nums; }
+.timer-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: end; gap: 6px; margin-top: 10px; }
+.timer-controls label { display: grid; gap: 3px; color: var(--muted); font-size: .8rem; }
+.timer-controls select { width: 100%; padding-inline: 5px; font-size: .9rem; color: #eaf4ff; }
+.primary { background: var(--ice); border-color: var(--ice); color: #091621; font-weight: 700; }
+.workout-heading { align-items: start; }
+.workout-heading h2 { font-size: clamp(1.6rem, 4vw, 2.25rem); }
+.eyebrow { color: var(--gold); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+.status { font-size: .75rem; padding: 3px 8px; border: 1px solid currentColor; border-radius: 20px; color: var(--gold); margin-top: 4px; }
+.status.ice { color: var(--ice); }
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 14px 0; }
+.choices .push { background: #2f2337; }
+.choices .pull { background: #172f45; }
+.choices .legs { background: #25372e; }
+.choices [aria-pressed="true"] { border-color: var(--ice); color: var(--ice); }
+.progress { font-size: .8rem; color: var(--muted); margin-bottom: 12px; }
+progress { width: 44%; accent-color: var(--ice); }
+.exercise { margin-bottom: 7px; border: 1px solid var(--edge); border-radius: 9px; background: #142133; }
+summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; cursor: pointer; padding: 10px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary small { display: block; }
+summary > small::after { content: ' ▾'; color: var(--ice); }
+details[open] summary > small::after { content: ' ▴'; }
+.exercise-index { color: var(--gold); font-variant-numeric: tabular-nums; font-size: .8rem; }
+.exercise-body { border-top: 1px solid var(--edge); padding: 8px; }
+.previous { margin-bottom: 7px; font-size: .8rem; }
+.set, .set-labels { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, .7fr) 52px 44px; gap: 5px; align-items: center; }
+.set { margin: 5px 0; }
+.set-labels { font-size: .67rem; color: var(--muted); }
+.set-number { padding-left: 4px; }
+.set input { min-width: 0; min-height: 44px; border: 1px solid var(--edge); border-radius: 7px; background: #0b1523; padding: 4px 6px; }
+.set button { padding-inline: 2px; font-size: .81rem; }
+.check[aria-pressed="true"] { background: var(--ice); color: #091621; }
+.workout-actions { margin-top: 14px; }
+.empty, .secondary p { margin-top: 10px; }
+.history { width: 100%; text-align: left; margin-top: 8px; }
+.history small { display: block; }
+.history > span:last-child { font-size: .82rem; color: var(--ice); }
+.backup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.restore { display: inline-grid; place-items: center; position: relative; }
+.restore input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.restore:focus-within { outline: 2px solid var(--ice); }
+.notice { margin: 8px 0; padding: 8px 12px; color: var(--gold); border: 1px solid var(--edge); border-radius: 8px; }
+@media (max-width: 700px) {
+  .dashboard { grid-template-columns: minmax(0, 1fr); }
+  .calendar-grid button { min-height: 44px; }
+}
+
