@@ -1,5 +1,7 @@
 # Strength Log
 
+### [Open Strength Log](https://carl-ackerly.github.io/strength-log/)
+
 Strength Log is the working title for a mobile-first Push/Pull/Legs tracker. It runs as a static React app and keeps workout records and settings in the browser.
 
 ## Run locally
