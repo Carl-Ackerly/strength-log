@@ -40,12 +40,19 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET' || !shell.includes(event.request.url)) return;
-  event.respondWith(caches.open(cacheName).then(async cache =>
-    (await cache.match(event.request, { ignoreVary: true })) || fetch(event.request)));
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  url.hash = '';
+  const navigation = event.request.mode === 'navigate' && url.href.startsWith(self.registration.scope);
+  if (!navigation && !shell.includes(url.href)) return;
+  event.respondWith(caches.open(cacheName).then(async cache => {
+    const target = navigation ? new URL('./index.html', self.registration.scope).href : url.href;
+    return (await cache.match(target, { ignoreVary: true })) || fetch(event.request);
+  }));
 });
 `,
       });
     },
   }],
 });
+

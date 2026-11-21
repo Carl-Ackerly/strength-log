@@ -147,7 +147,7 @@ function App() {
         </button>)}</div>
         <progress aria-label="Weekly workout completion" value={weekCompleted.length} max={Math.max(planned.length, 1)} />
       </section>
-      {history.find(([, d]) => !d.completed && countSets(d)) && <section className="panel"><h2>Keep going</h2>{history.filter(([date, d]) => date !== today && !d.completed && countSets(d)).slice(0, 3).map(([date, d]) => <button className="list-item" key={date} onClick={() => go('workout/' + date)}><span>{d.type} Day<small>{formatDate(date)} · {countSets(d)} sets logged</small></span><span className="link-text">Resume</span></button>)}<p className="meta">Every edit is saved on this device.</p></section>}
+      {history.some(([date, d]) => date !== today && !d.completed && countSets(d)) && <section className="panel"><h2>Keep going</h2>{history.filter(([date, d]) => date !== today && !d.completed && countSets(d)).slice(0, 3).map(([date, d]) => <button className="list-item" key={date} onClick={() => go('workout/' + date)}><span>{d.type} Day<small>{formatDate(date)} · {countSets(d)} sets logged</small></span><span className="link-text">Resume</span></button>)}<p className="meta">Every edit is saved on this device.</p></section>}
     </>}
     {route.page === 'workouts' && <>
       <PageHeading eyebrow="Your routines" title="Workouts" text="Train in any order. Make each session yours." />
