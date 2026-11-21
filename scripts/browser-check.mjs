@@ -148,6 +148,7 @@ try {
   console.error(error);
   if (browser) {
     for (const context of browser.contexts()) for (const page of context.pages()) {
+      console.error('Failure page:', page.url(), await page.locator('body').innerText());
       await page.screenshot({ path: 'test-results/failure.png', fullPage: true }).catch(() => {});
       await writeFile('test-results/failure.html', await page.content()).catch(() => {});
     }

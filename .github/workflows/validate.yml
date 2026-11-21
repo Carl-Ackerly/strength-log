@@ -11,6 +11,7 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         browser: [chromium, webkit]
     timeout-minutes: 12
