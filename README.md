@@ -1,62 +1,59 @@
-# Strength Log
+# Training Journal
 
-### [Open Strength Log](https://carl-ackerly.github.io/strength-log/)
+An iPhone-friendly React/Vite PWA for Push, Pull and Legs training.
 
-Strength Log is the working title for a mobile-first Push/Pull/Legs tracker. It runs as a static React app and keeps workout records and settings in the browser.
+**Live app:** https://carl-ackerly.github.io/strength-log/
 
-## Run locally
+## Features
 
-Use Node.js 24 and npm.
+- True black OLED theme with steel-blue accents and safe-area-aware bottom navigation.
+- Home shows today's dated schedule, real completed-workout statistics and weekly progress.
+- Calendar supports independent Push, Pull, Legs and Rest plans on every date.
+- Workout exercise list opens dedicated set logging; exercise order is unrestricted.
+- Each edit is written synchronously to local storage. Inputs, completed sets and optional effort ratings survive navigation and reloads.
+- Resistance can be pounds, machine levels, bodyweight or repetitions only. Each recorded set retains its units. Changing resistance type clears that session's resistance values after confirmation; historical sessions retain theirs.
+- Previous comparisons come from the latest earlier completed workout containing the exercise. Resistance never increases automatically.
+- Progress includes history, best recorded sets, progression and pounds-times-repetitions volume. Machine levels and unweighted exercises never contribute to weight volume.
+- Editable routine names, exercises, ordering, set counts and repetition targets; existing sessions keep snapshots of their exercise lists.
+- Feedback Notebook saves a local draft and dated notes with screen context, with copy and text export.
+- No built-in rest timer.
+
+## Data and compatibility
+
+Data stays in the browser on the current device. No account, backend, analytics or workout-data uploads are used.
+
+The original storage key is retained: `strength-log:v1:/strength-log/` for the deployed base path. Version-1 backups migrate to schema version 2 without losing set keys, completion states, weights or repetitions. Legacy sessions retain all three sets per exercise, including exercises whose new template now has two. Old timer settings are discarded during migration.
+
+Original version-1 data is retained locally under the key ending `:before-v2` before the first migrated write. Restoring a backup also retains the replaced raw data under `:before-restore`. Unreadable saved data is protected from overwrite until a valid backup is restored. Settings provides JSON backup/restore and original-data recovery download. Clearing Safari website data removes local records: export backups regularly. Restores replace the current dataset after confirmation.
+
+Schema version 2 stores `days`, dated exercise snapshots and set maps, `templates`, resistance `preferences`, `showDifficulty`, `notes` and `noteDraft`. New backups restore into this version of Training Journal; they are not intended for older app code.
+
+Completed workout volume includes all entered sets. In-progress volume includes only checked sets. Personal records rank by resistance then repetitions within one exercise and resistance type; bodyweight and reps-only records rank by reps. Machine-level comparisons are meaningful only on the same machine.
+
+## Development and checks
+
+Use Node.js 24 or newer.
 
 ```sh
 npm ci
+npm test
 npm run dev
+npm run build
+npm run preview
 ```
 
-Open the URL printed by Vite. To test the installable, offline-capable build locally, run `npm run build` and then `npm run preview`. Open the printed preview URL at `/strength-log/`. The service worker runs in production builds on HTTPS or localhost. Open the app online once before going offline.
-
-## Push to GitHub and deploy
-
-1. Create an empty GitHub repository. The suggested name is `strength-log`. Leave GitHub's README and .gitignore initialization unchecked.
-2. In the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
-3. From this project directory, run the commands below. Replace `YOUR-USERNAME` and, if you picked a different repository name, replace `strength-log` in the remote URL.
+Data checks use the Node test runner. Browser checks run against the production preview:
 
 ```sh
-git init -b main
-git add .
-git commit -m "Add Strength Log gym tracker"
-git remote add origin https://github.com/YOUR-USERNAME/strength-log.git
-git push -u origin main
+npm install --no-save --package-lock=false playwright@1.56.1
+npx playwright install chromium
+node scripts/browser-check.mjs
 ```
 
-4. Open the repository's **Actions** tab and wait for **Deploy Strength Log** to finish. Open the deployment URL linked by the workflow. A standard project URL looks like `https://YOUR-USERNAME.github.io/strength-log/`.
+The validation workflow runs data checks, production build, mobile browser navigation and persistence checks, legacy restore, notebook, routine edits, unit-safe records, responsive widths and offline reload. All fixtures are synthetic; no personal workout data is committed.
 
-The workflow uses the base path returned by GitHub Pages, so a different repo name also works in deployment. For a local preview of a different path, set `BASE_PATH` to the desired path with leading and trailing slashes before building and previewing it.
+## GitHub Pages and iPhone offline support
 
-## Install on iPhone
+The existing Pages workflow and `/strength-log/` Vite base path are retained. Pushing main runs data checks and builds/deploys Pages. The build emits a versioned service worker that caches the app shell, manifest and icons. Hash navigation works without Pages route rewrites.
 
-1. Open the deployed HTTPS URL in **Safari**.
-2. Tap **Share** and choose **Add to Home Screen**. If Share is inside the page menu, open that menu first.
-3. Enable **Open as Web App** if shown, then tap **Add**.
-4. Launch **Strength Log** from the Home Screen while online once and allow the page to finish loading. You can then test by reopening it in Airplane Mode.
-
-[Apple's Safari installation instructions](https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios)
-
-## Log a workout
-
-Select a date, then choose Push, Pull, or Legs. Gold marks a planned workout and icy blue marks a completed workout. Open an exercise to reveal its sets. Enter reps and optional weight in pounds, then tap **Log**, or tap **✓** to save and mark a set done in one step. Earlier entries for that exercise appear above the set rows. Tap **Complete workout** when finished and use **History** to reopen your sessions.
-
-The timer can start when you first log a set, when you mark a set done, or only when you tap **Start**. The countdown uses an end time so it catches up when you return to the app. The completion indicator is in the app.
-
-The earlier conversation specified reps for lat pulldown, seated row, and high row. The other targets are starter values. Edit the routine definitions in `src/data.js` if you want to change those defaults before logging.
-
-## Keep backups private
-
-The repository contains code, routine templates, and app assets. The app keeps workout data in browser storage and has no server or analytics. Use **Backup → Export JSON** to save a copy to Files. **Restore backup** replaces this installation's workouts and settings after confirmation. Export from the browser before switching to the installed web app if you already entered data, then import there if needed. Clearing website data or changing the deployed URL can affect access to existing records.
-
-Keep workout exports outside the repository. The default backup filename is ignored by Git.
-
-## Rename the app later
-
-Update the heading in `src/main.jsx`, title in `index.html`, and `name` and `short_name` in `public/manifest.webmanifest`. The installed icon label can also be edited when adding the app to the Home Screen. Keep the existing Pages URL and storage key to retain access to workouts when changing the display name.
-
+In Safari use Share → Add to Home Screen. Open online once to cache the current version. For a new version, close all installed-app windows and browser tabs for the app, then reopen online. The service worker waits for old windows to close rather than replacing a running workout.
