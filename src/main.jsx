@@ -188,7 +188,7 @@ function App() {
       <section className="panel"><label className="row"><span><strong>Set difficulty controls</strong><small>Show Easy, Moderate and Hard while logging.</small></span><input type="checkbox" checked={data.showDifficulty} onChange={e => persist(d => ({ ...d, showDifficulty: e.target.checked }))} /></label><p className="meta">Hiding controls keeps your saved ratings and comparisons.</p></section>
       <section className="panel"><h2>Backup & restore</h2><p>Your schedule, workouts, routines and feedback stay on this device. Export regularly to keep a separate copy.</p><div className="actions"><button className="primary" onClick={exportBackup}>Export backup</button><label className="button restore">Restore backup<input aria-label="Restore backup file" type="file" accept=".json,application/json" onChange={restore} /></label></div><p className="meta">Accepts original Strength Log v1 and Training Journal v2 backups.</p>
         <button className="text-button" onClick={() => {
-          const raw = localStorage.getItem(storageKey + ':before-v2') || localStorage.getItem(storageKey);
+          const raw = localStorage.getItem(storageKey + ':before-v2') || localStorage.getItem(storageKey + ':before-restore') || localStorage.getItem(storageKey);
           if (raw) download(raw, 'strength-log-recovery-' + today + '.json');
           else setNotice('No saved recovery data is available yet.');
         }}>Download original / recovery data</button>{blocked && <p className="notice">Editing is paused until you restore a valid backup. Your original storage has not been overwritten.</p>}
@@ -284,15 +284,16 @@ function Notebook({ data, persist, context, close, notice }) {
   const draft = data.noteDraft;
   const panel = useRef(null);
   useEffect(() => { panel.current?.focus(); }, []);
-  const update = patch => persist(d => ({ ...d, noteDraft: { ...d.noteDraft, context: d.noteDraft.text ? d.noteDraft.context : context, ...patch } }));
-  const text = data.notes.map(n => '[' + new Date(n.createdAt).toLocaleString() + '] ' + n.category + ' · ' + n.context + '\n' + n.text).join('\n\n');
+  const update = patch => persist(d => ({ ...d, noteDraft: { ...d.noteDraft, context: d.noteDraft.text ? d.noteDraft.context : context, createdAt: d.noteDraft.text && d.noteDraft.createdAt ? d.noteDraft.createdAt : new Date().toISOString(), ...patch } }));
+  const exportNotes = draft.text.trim() ? [{ ...draft, createdAt: draft.createdAt || new Date().toISOString(), text: draft.text + ' (draft)' }, ...data.notes] : data.notes;
+  const text = exportNotes.map(n => '[' + new Date(n.createdAt).toLocaleString() + '] ' + n.category + ' · ' + n.context + '\n' + n.text).join('\n\n');
   return <aside className="notebook" aria-label="Feedback Notebook" ref={panel} tabIndex={-1} onKeyDown={e => { if (e.key === 'Escape') close(); }}>
     <div className="row"><h2>Feedback Notebook</h2><button aria-label="Close Feedback Notebook" onClick={close}>×</button></div>
     <p className="meta">Draft saved automatically · {draft.context || context}</p>
     <label className="field">Category<select aria-label="Category" value={draft.category} onChange={e => update({ category: e.target.value })}>{['Bug', 'Improvement', 'Idea'].map(c => <option key={c}>{c}</option>)}</select></label>
-    <label className="field">Note<textarea rows="3" maxLength={10000} placeholder="What did you notice?" value={draft.text} onChange={e => update({ text: e.target.value })} /></label>
-    <button className="primary wide" disabled={!draft.text.trim()} onClick={() => persist(d => ({ ...d, notes: [{ id: uid(), category: d.noteDraft.category, text: d.noteDraft.text.trim(), createdAt: new Date().toISOString(), context: d.noteDraft.context || context }, ...d.notes], noteDraft: { category: d.noteDraft.category, text: '', context: '' } }))}>Save note</button>
-    <div className="actions"><button disabled={!data.notes.length} onClick={async () => { try { await navigator.clipboard.writeText(text); notice('Feedback copied.'); } catch { notice('Clipboard unavailable. Use Export notes to share your feedback.'); } }}>Copy notes</button><button disabled={!data.notes.length} onClick={() => download(text, 'training-feedback-' + dateKey(new Date()) + '.txt', 'text/plain')}>Export notes</button></div>
+    <label className="field">Note<textarea aria-label="Note" rows="3" maxLength={10000} placeholder="What did you notice?" value={draft.text} onChange={e => update({ text: e.target.value })} /></label>
+    <button className="primary wide" disabled={!draft.text.trim()} onClick={() => persist(d => ({ ...d, notes: [{ id: uid(), category: d.noteDraft.category, text: d.noteDraft.text.trim(), createdAt: d.noteDraft.createdAt || new Date().toISOString(), context: d.noteDraft.context || context }, ...d.notes], noteDraft: { category: d.noteDraft.category, text: '', context: '' } }))}>Save note</button>
+    <div className="actions"><button disabled={!exportNotes.length} onClick={async () => { try { await navigator.clipboard.writeText(text); notice('Feedback copied.'); } catch { notice('Clipboard unavailable. Use Export notes to share your feedback.'); } }}>Copy notes</button><button disabled={!exportNotes.length} onClick={() => download(text, 'training-feedback-' + dateKey(new Date()) + '.txt', 'text/plain')}>Export notes</button></div>
     <div className="notes-list">{data.notes.map(n => <article key={n.id}><strong>{n.category}</strong><small>{new Date(n.createdAt).toLocaleString()} · {n.context}</small><p>{n.text}</p></article>)}</div>
   </aside>;
 }

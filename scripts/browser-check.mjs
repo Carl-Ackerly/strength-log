@@ -32,6 +32,17 @@ try {
   await page.getByRole('button', { name: 'Set 1 Moderate', exact: true }).click();
   await page.getByLabel('Complete set 1', { exact: true }).check();
   await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByLabel('Set 1 weight', { exact: true }).fill('50');
+  await page.getByLabel('Set 1 reps', { exact: true }).fill('10');
+  await page.getByLabel('Complete set 1', { exact: true }).check();
+  await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByLabel('Resistance type', { exact: true }).selectOption('bodyweight');
+  await page.getByLabel('Set 1 reps', { exact: true }).fill('8');
+  await page.getByLabel('Complete set 1', { exact: true }).check();
+  await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByLabel('Resistance type', { exact: true }).selectOption('reps');
+  await page.getByLabel('Set 1 reps', { exact: true }).fill('15');
+  await page.getByLabel('Complete set 1', { exact: true }).check();
   await page.getByRole('button', { name: 'Back to Exercise List', exact: true }).first().click();
   await page.getByRole('button', { name: /Machine Chest Press/ }).click();
   assert.equal(await page.getByLabel('Set 1 level', { exact: true }).inputValue(), '7');
@@ -46,6 +57,8 @@ try {
   await page.getByRole('button', { name: 'Open Feedback Notebook', exact: true }).click();
   await page.getByLabel('Category', { exact: true }).selectOption('Bug');
   await page.getByLabel('Note', { exact: true }).fill('Synthetic browser check feedback');
+  const draft = await page.evaluate(() => JSON.parse(localStorage.getItem('strength-log:v1:/strength-log/')).noteDraft);
+  assert.ok(Number.isFinite(Date.parse(draft.createdAt)));
   await page.getByRole('button', { name: 'Close Feedback Notebook', exact: true }).click();
   await page.reload();
   await page.getByRole('button', { name: 'Open Feedback Notebook', exact: true }).click();
@@ -66,7 +79,7 @@ try {
   await nav('Progress').click();
   await page.getByLabel('Resistance type', { exact: true }).selectOption('level');
   await page.getByText('Level 7 × 12 · Moderate', { exact: true }).first().waitFor();
-  assert.match(await page.locator('.stats-grid').innerText(), /0 lb/);
+  assert.match(await page.locator('.stats-grid').innerText(), /500 lb/);
   // Backups contain all new data and restore through the public UI.
   await page.getByRole('button', { name: 'Settings and backup', exact: true }).click();
   const [backup] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export backup', exact: true }).click()]);
@@ -92,6 +105,8 @@ try {
   await page.screenshot({ path: 'test-results/exercise-mobile.png', fullPage: true });
   for (const width of [320, 390, 430, 768, 1280]) {
     await page.setViewportSize({ width, height: 844 });
+    await page.goto(base + '#/exercise/' + tomorrow + '/0');
+    await page.getByRole('heading', { name: 'Machine Chest Press', exact: true }).waitFor();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'exercise overflow at ' + width);
     await nav('Home').click();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'home overflow at ' + width);
