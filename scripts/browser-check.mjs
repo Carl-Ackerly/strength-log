@@ -71,7 +71,7 @@ try {
   await page.getByRole('button', { name: 'Export notes', exact: true }).waitFor({ state: 'visible' });
   await page.getByRole('button', { name: 'Close Feedback Notebook', exact: true }).click();
   await page.getByRole('button', { name: 'Settings and backup', exact: true }).click();
-  await page.getByRole('checkbox').uncheck();
+  await page.getByRole('checkbox', { name: /Set difficulty controls/ }).uncheck();
   await page.goBack();
   assert.equal(await page.getByRole('button', { name: 'Set 1 Moderate', exact: true }).count(), 0);
   const beforeFinish = await page.evaluate(() => JSON.parse(localStorage.getItem('strength-log:v1:/strength-log/')));
@@ -81,6 +81,7 @@ try {
   await page.getByRole('button', { name: 'Back to Exercise List', exact: true }).first().click();
   await page.getByRole('button', { name: 'Finish workout', exact: true }).click();
   await nav('Progress').click();
+  await page.getByRole('heading', { name: 'Progress', exact: true }).waitFor();
   await page.getByLabel('Resistance type', { exact: true }).selectOption('level');
   await page.getByText('Level 7 × 12 · Moderate', { exact: true }).first().waitFor();
   assert.match(await page.locator('.stats-grid').innerText(), /500 lb/);
