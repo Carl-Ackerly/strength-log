@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', '4173'], { stdio: 'inherit' });
+const startServer = () => spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', '4173'], { stdio: 'inherit' });
+let server = startServer();
 const base = 'http://127.0.0.1:4173/strength-log/';
 let browser;
 await mkdir('test-results', { recursive: true });
@@ -32,14 +33,17 @@ try {
   await page.getByRole('button', { name: 'Set 1 Moderate', exact: true }).click();
   await page.getByLabel('Complete set 1', { exact: true }).check();
   await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByRole('heading', { name: 'Incline Chest Press', exact: true }).waitFor();
   await page.getByLabel('Set 1 weight', { exact: true }).fill('50');
   await page.getByLabel('Set 1 reps', { exact: true }).fill('10');
   await page.getByLabel('Complete set 1', { exact: true }).check();
   await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByRole('heading', { name: 'Machine Shoulder Press', exact: true }).waitFor();
   await page.getByLabel('Resistance type', { exact: true }).selectOption('bodyweight');
   await page.getByLabel('Set 1 reps', { exact: true }).fill('8');
   await page.getByLabel('Complete set 1', { exact: true }).check();
   await page.getByRole('button', { name: 'Next Exercise', exact: true }).click();
+  await page.getByRole('heading', { name: 'Lateral Raise Machine', exact: true }).waitFor();
   await page.getByLabel('Resistance type', { exact: true }).selectOption('reps');
   await page.getByLabel('Set 1 reps', { exact: true }).fill('15');
   await page.getByLabel('Complete set 1', { exact: true }).check();
@@ -128,12 +132,18 @@ try {
     await navigator.serviceWorker.ready;
     if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
   });
-  await context.setOffline(true);
+  // Stop the actual origin, verifying cached navigation without relying on
+  // WebKit's protocol-level offline emulation (which can reject navigation internally).
+  await new Promise(resolve => { server.once('exit', resolve); server.kill(); });
   await page.reload();
   await page.getByRole('heading', { name: /Your training/ }).waitFor();
   await nav('Workouts').click();
   await page.getByRole('button', { name: 'Open for today', exact: true }).first().waitFor();
-  await context.setOffline(false);
+  server = startServer();
+  for (let i = 0; i < 100; i++) {
+    try { if ((await fetch(base)).ok) break; } catch {}
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
   assert.deepEqual(errors, []);
   await context.close();
 
